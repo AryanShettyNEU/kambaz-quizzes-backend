@@ -125,11 +125,40 @@ export default function StudentQuizAttemptDao() {
     return await model.deleteOne({ _id: attemptId });
   };
 
+  const findAttemptById = async (studentId, attemptId) => {
+    const attempt = await model.findById(attemptId);
+    if (attempt.user !== studentId) {
+      const err = new Error("Attempt does not belong to the student.");
+      err.code = "UNAUTHORIZED";
+      throw err;
+    }
+    const quiz = await quizDao.findQuizByIdWithoutCorrectness(attempt.quiz);
+    const populatedAnswers = attempt.answers.map((ans) => {
+      const question = quiz.questions.id(ans.questionId);
+      if (!question) return ans.toObject();
+      return {
+        ...ans.toObject(),
+        question: {
+          _id: question._id,
+          title: question.title,
+          type: question.type,
+          questionText: question.questionText,
+          options: question.options,
+          points: question.points,
+        },
+      };
+    });
+    const attemptObj = attempt.toObject();
+    attemptObj.answers = populatedAnswers;
+    return attemptObj;
+  };
+
   return {
     findAttemptsByStudentQuiz,
     findLastAttemptWithQuestions,
     countAttempts,
     deleteAttempt,
     submitAttempt,
+    findAttemptById,
   };
 }
