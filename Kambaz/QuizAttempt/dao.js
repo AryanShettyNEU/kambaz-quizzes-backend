@@ -23,10 +23,11 @@ export default function StudentQuizAttemptDao() {
   };
 
   function isCorrect(question, userAnswer) {
-    const correctOption = question.options.find((o) => o.isCorrect);
-    if (!correctOption) return false;
+    const correctValues = question.options
+      .filter((o) => o.isCorrect)
+      .map((o) => String(o.text));
 
-    return String(correctOption.text) === String(userAnswer);
+    return correctValues.includes(String(userAnswer));
   }
 
   async function submitAttempt(studentId, quizId, answers) {
