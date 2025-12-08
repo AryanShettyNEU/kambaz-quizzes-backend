@@ -5,7 +5,6 @@ export default function StudentQuizAttemptRoutes(app) {
 
   const getCurrentUserId = (req) => {
     const user = req.session["currentUser"];
-    console.log(user);
     return user?._id ?? null;
   };
 

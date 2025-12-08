@@ -4,9 +4,9 @@ import QuizzesDao from "./dao.js";
 export default function QuizzesRoutes(app) {
   const dao = QuizzesDao();
 
-  const requireUser = (req, res) => {
+  const requireUserFaculty = (req, res) => {
     const currentUser = req.session["currentUser"];
-    if (!currentUser) {
+    if (currentUser?.role !== "FACULTY") {
       res.sendStatus(401);
       return null;
     }
@@ -30,6 +30,8 @@ export default function QuizzesRoutes(app) {
   };
 
   const findQuizByIdAdmin = async (req, res) => {
+    const currentUser = requireUserFaculty(req, res);
+    if (!currentUser) return;
     const { quizId } = req.params;
     const quiz = await dao.findQuizById(quizId);
     if (!quiz) {
@@ -40,26 +42,32 @@ export default function QuizzesRoutes(app) {
   };
 
   const createQuiz = async (req, res) => {
+    const currentUser = requireUserFaculty(req, res);
+    if (!currentUser) return;
     const quiz = req.body;
     const newQuiz = await dao.createQuiz(quiz);
     res.json(newQuiz);
   };
 
   const updateQuiz = async (req, res) => {
+    const currentUser = requireUserFaculty(req, res);
+    if (!currentUser) return;
     const { quizId } = req.params;
     const update = await dao.updateQuiz(quizId, req.body);
     res.json(update);
   };
 
   const deleteQuiz = async (req, res) => {
+    const currentUser = requireUserFaculty(req, res);
+    if (!currentUser) return;
     const { quizId } = req.params;
     const status = await dao.deleteQuiz(quizId);
     res.json(status);
   };
 
   const setQuizPublishStatus = async (req, res) => {
-    // const currentUser = requireUser(req, res);
-    // if (!currentUser) return;
+    const currentUser = requireUserFaculty(req, res);
+    if (!currentUser) return;
     const { quizId } = req.params;
     const { published } = req.body;
     const result = await dao.setQuizPublishStatus(quizId, published);
@@ -67,8 +75,8 @@ export default function QuizzesRoutes(app) {
   };
 
   const addQuestion = async (req, res) => {
-    // const currentUser = requireUser(req, res);
-    // if (!currentUser) return;
+    const currentUser = requireUserFaculty(req, res);
+    if (!currentUser) return;
     const { quizId } = req.params;
     const question = req.body;
     const updatedQuiz = await dao.addQuestionToQuiz(quizId, question);
@@ -76,8 +84,8 @@ export default function QuizzesRoutes(app) {
   };
 
   const updateQuestion = async (req, res) => {
-    // const currentUser = requireUser(req, res);
-    // if (!currentUser) return;
+    const currentUser = requireUserFaculty(req, res);
+    if (!currentUser) return;
     const { quizId, questionId } = req.params;
     const updates = req.body;
     const updatedQuiz = await dao.updateQuestionInQuiz(
@@ -89,8 +97,8 @@ export default function QuizzesRoutes(app) {
   };
 
   const deleteQuestion = async (req, res) => {
-    // const currentUser = requireUser(req, res);
-    // if (!currentUser) return;
+    const currentUser = requireUserFaculty(req, res);
+    if (!currentUser) return;
     const { quizId, questionId } = req.params;
     const updatedQuiz = await dao.deleteQuestionFromQuiz(quizId, questionId);
     res.json(updatedQuiz);
